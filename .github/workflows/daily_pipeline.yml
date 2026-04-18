@@ -1,0 +1,45 @@
+name: Daily Threat Intel Pipeline
+
+on:
+  schedule:
+    - cron: '0 10 * * *'  # 4 AM Mountain Time (UTC-6)
+  workflow_dispatch:       # allows manual trigger from GitHub UI
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run pipeline
+        env:
+          OTX_API_KEY:           ${{ secrets.OTX_API_KEY }}
+          THREATFOX_API_KEY:     ${{ secrets.THREATFOX_API_KEY }}
+          ABUSE_API_KEY:         ${{ secrets.ABUSE_API_KEY }}
+          IPINFO_TOKEN:          ${{ secrets.IPINFO_TOKEN }}
+          NVD_API_KEY:           ${{ secrets.NVD_API_KEY }}
+          R2_ACCOUNT_ID:         ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID:      ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY:  ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET_NAME:        ${{ secrets.R2_BUCKET_NAME }}
+        run: python threat_pipeline.py
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: threat-log
+          path: threat.log
+          retention-days: 7
