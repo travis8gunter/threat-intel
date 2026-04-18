@@ -1,0 +1,36 @@
+# === Secrets — never commit ===
+.env
+.env.*
+*.env
+
+# === Python ===
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# === Pipeline outputs (large, regenerated on each run) ===
+feeds/
+output/
+.nvd_cache.json
+
+# === Logs ===
+*.log
+threat.log
+
+# === Docs (confidential architecture notes) ===
+docs/
+
+# === OS / editor noise ===
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
