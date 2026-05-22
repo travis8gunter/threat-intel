@@ -146,6 +146,10 @@ def pull_otx() -> list[dict]:
         logger.error(f"[OTX] Failed: {e}")
         return []
 
+    if not isinstance(data, dict):
+        logger.warning(f"[OTX] Unexpected response (expected dict, got {type(data).__name__}): {str(data)[:200]}")
+        return []
+
     iocs = []
     for pulse in data.get("results", []):
         adversary = pulse.get("adversary", "") or ""

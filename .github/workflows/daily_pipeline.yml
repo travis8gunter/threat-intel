@@ -8,7 +8,7 @@ on:
 jobs:
   run-pipeline:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 25
 
     steps:
       - name: Checkout repo
@@ -34,10 +34,10 @@ jobs:
           R2_ACCESS_KEY_ID:      ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY:  ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_BUCKET_NAME:        ${{ secrets.R2_BUCKET_NAME }}
-        run: python threat_pipeline.py
+        run: python threat_pipeline.py --quick
 
-      - name: Upload logs on failure
-        if: failure()
+      - name: Upload logs
+        if: always()
         uses: actions/upload-artifact@v4.6.2
         with:
           name: threat-log
