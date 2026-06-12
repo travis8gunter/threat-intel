@@ -2,8 +2,14 @@ name: Daily Threat Intel Pipeline
 
 on:
   schedule:
-    - cron: '0 10 * * *'  # 4 AM Mountain Time (UTC-6)
+    - cron: '0 10 * * *'  # 4 AM Mountain Time (UTC-6) — primary run
+    - cron: '0 16 * * *'  # 10 AM MT — catch-up run (idempotent: same date path,
+                          # overwrites; covers API limits/outages in the 4 AM run)
   workflow_dispatch:       # allows manual trigger from GitHub UI
+
+concurrency:
+  group: threat-pipeline
+  cancel-in-progress: false
 
 jobs:
   run-pipeline:

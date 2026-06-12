@@ -98,7 +98,7 @@ def run_pipeline(skip_r2: bool = False, quick: bool = False):
     logger.info(f"  → {len(raw_iocs)} raw IOCs pulled")
 
     if quick:
-        raw_iocs = _cap_iocs(raw_iocs, limit=100)
+        raw_iocs = _cap_iocs(raw_iocs, limit=300)
 
     sources_hit = {ioc.get("source", "") for ioc in raw_iocs if ioc.get("source")}
     logger.info(f"  → Sources online: {sorted(sources_hit)}")
