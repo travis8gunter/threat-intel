@@ -51,3 +51,24 @@ jobs:
           name: threat-log
           path: threat.log
           retention-days: 7
+
+      - name: Notify on failure
+        if: failure()
+        env:
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          ALERT_EMAIL:   ${{ secrets.ALERT_EMAIL }}
+        run: |
+          if [ -n "$BREVO_API_KEY" ] && [ -n "$ALERT_EMAIL" ]; then
+            curl -s -X POST 'https://api.brevo.com/v3/smtp/email' \
+              -H "api-key: $BREVO_API_KEY" \
+              -H 'Content-Type: application/json' \
+              -d "{
+                \"sender\": {\"name\": \"Komoto Pipeline\", \"email\": \"alerts@komotosecurity.com\"},
+                \"to\": [{\"email\": \"$ALERT_EMAIL\"}],
+                \"subject\": \"[ALERT] Threat pipeline failed — $(date -u +%Y-%m-%d)\",
+                \"htmlContent\": \"<p>The daily threat intel pipeline failed at $(date -u).</p><p>Check the <a href='https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'>workflow run</a> for details.</p><p>Last 20 lines of threat.log:</p><pre>$(tail -20 threat.log 2>/dev/null || echo 'No log file found')</pre>\"
+              }"
+            echo "Alert email sent to $ALERT_EMAIL"
+          else
+            echo "::warning::BREVO_API_KEY or ALERT_EMAIL not set — skipping failure alert"
+          fi
