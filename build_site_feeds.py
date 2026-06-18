@@ -808,6 +808,9 @@ def build_siem_json(enriched: list[dict]) -> dict:
             "kev":              ioc.get("source") == "CISA KEV",
             # Hash
             "hash_type":        ioc.get("hash_type", ""),
+            # MITRE ATT&CK (deterministic mapping)
+            "mitre_techniques": [t["id"] for t in ioc.get("attack", [])],
+            "mitre_tactics":    sorted({t["tactic"] for t in ioc.get("attack", [])}),
             # Feed metadata
             "feed":             "komoto-threat-intel",
             "tlp":              "WHITE",

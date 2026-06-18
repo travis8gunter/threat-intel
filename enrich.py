@@ -20,6 +20,8 @@ import requests
 from pathlib import Path
 from dotenv import load_dotenv
 
+from attack_map import annotate_attack
+
 load_dotenv()
 logger = logging.getLogger(__name__)
 
@@ -472,6 +474,9 @@ def enrich_all(iocs: list[dict]) -> list[dict]:
     # --- Pass 3: severity (after CVSS populated) ---
     for ioc in iocs:
         ioc["severity"] = _get_severity(ioc)
+
+    # --- Pass 4: MITRE ATT&CK mapping (deterministic, no API) ---
+    annotate_attack(iocs)
 
     logger.info(f"[Enrich] Done. {total} IOCs enriched.")
     return iocs
