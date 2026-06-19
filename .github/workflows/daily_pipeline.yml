@@ -14,19 +14,25 @@ concurrency:
 jobs:
   run-pipeline:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5.6.0
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
+
+      - name: Restore NVD cache
+        uses: actions/cache@v4
+        with:
+          path: .nvd_cache.json
+          key: nvd-cache-${{ runner.os }}
 
       - name: Install dependencies
         run: pip install -r requirements.txt
@@ -44,9 +50,16 @@ jobs:
           R2_BUCKET_NAME:        ${{ secrets.R2_BUCKET_NAME }}
         run: python threat_pipeline.py --quick
 
+      - name: Save NVD cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: .nvd_cache.json
+          key: nvd-cache-${{ runner.os }}
+
       - name: Upload logs
         if: always()
-        uses: actions/upload-artifact@v4.6.2
+        uses: actions/upload-artifact@v4
         with:
           name: threat-log
           path: threat.log
